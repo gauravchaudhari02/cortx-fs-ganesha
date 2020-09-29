@@ -73,8 +73,8 @@ static const struct fsal_staticfsinfo_t default_kvsfs_info = {
 					   it is possible to cross junctions
 					   for resolving an NFS export path. */
 	.delegations = FSAL_OPTION_FILE_DELEGATIONS,	/*< fsal supports delegations */ /* TODO */
-	.pnfs_mds = false,		/*< fsal supports file pnfs MDS */ /* TODO */
-	.pnfs_ds = false,		/*< fsal supports file pnfs DS */ /* TODO */
+	.pnfs_mds = true,		/*< fsal supports file pnfs MDS */ /* TODO */
+	.pnfs_ds = true,		/*< fsal supports file pnfs DS */ /* TODO */
 	.fsal_trace = false,		/*< fsal trace supports */ /* TBD */
 	.fsal_grace = false,		/*< fsal will handle grace */ /* TBD */
 	.link_supports_permission_checks = true,
@@ -163,7 +163,7 @@ static fsal_status_t kvsfs_init_config(struct fsal_module *fsal_hdl,
 	 * file, that change needs to be done from here
 	 * Initialize KVSFS FSAL obj's pNFS module
 	 */
-	rc = kvsfs_pmds_ini(kvsfs, kvsfs_params);
+	rc = cortxfs_pmds_ini(kvsfs, kvsfs_params);
 	if (rc == -1) {
 		LogCrit(COMPONENT_FSAL, "Failed to load pNFS config");
 		rc = -EINVAL;
@@ -330,9 +330,9 @@ static int kvsfs_unload(struct fsal_module *fsal_hdl)
 		goto out;
 	}
 
-	rc = kvsfs_pmds_fini(&KVSFS);
+	rc = cortxfs_pmds_fini(&KVSFS);
 	if (rc) {
-		LogCrit(COMPONENT_FSAL, "kvsfs_pmds_fini() failed (%d)", rc);
+		LogCrit(COMPONENT_FSAL, "cortxfs_pmds_fini() failed (%d)", rc);
 		goto out;
 	}
 
