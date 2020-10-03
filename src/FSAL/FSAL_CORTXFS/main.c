@@ -73,8 +73,8 @@ static const struct fsal_staticfsinfo_t default_kvsfs_info = {
 					   it is possible to cross junctions
 					   for resolving an NFS export path. */
 	.delegations = FSAL_OPTION_FILE_DELEGATIONS,	/*< fsal supports delegations */ /* TODO */
-	.pnfs_mds = true,		/*< fsal supports file pnfs MDS */ /* TODO */
-	.pnfs_ds = true,		/*< fsal supports file pnfs DS */ /* TODO */
+	.pnfs_mds = false,		/*< fsal supports file pnfs MDS */ /* TODO */
+	.pnfs_ds = false,		/*< fsal supports file pnfs DS */ /* TODO */
 	.fsal_trace = false,		/*< fsal trace supports */ /* TBD */
 	.fsal_grace = false,		/*< fsal will handle grace */ /* TBD */
 	.link_supports_permission_checks = true,
@@ -108,10 +108,6 @@ static struct config_item kvsfs_params[] = {
 		       kvsfs_fsal_module, fs_info.umask),
 	CONF_ITEM_BOOL("auth_xdev_export", false,
 		       kvsfs_fsal_module, fs_info.auth_exportpath_xdev),
-	CONF_ITEM_BOOL("pnfs_ds", true,
-			kvsfs_fsal_module, fs_info.pnfs_ds),
-	CONF_ITEM_BOOL("pnfs_mds", true,
-			kvsfs_fsal_module, fs_info.pnfs_mds),        
 	CONFIG_EOL
 };
 
@@ -169,6 +165,15 @@ static fsal_status_t kvsfs_init_config(struct fsal_module *fsal_hdl,
 		rc = -EINVAL;
 		goto out;
 	}
+
+	uint8_t pnfs_role = get_pnfs_role(kvsfs);
+	if (pnfs_role == CORTXFS_PNFS_MDS || pnfs_role == CORTXFS_PNFS_BOTH) {
+		kvsfs->fs_info.pnfs_mds = true;
+	}
+	if (pnfs_role == CORTXFS_PNFS_DS || pnfs_role == CORTXFS_PNFS_BOTH) {
+		kvsfs->fs_info.pnfs_ds = true;
+	}
+
 
 	/* assign the final values to the base structure */
 	fsal_hdl->fs_info = kvsfs->fs_info;
